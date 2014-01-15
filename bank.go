@@ -53,7 +53,7 @@ func LoadBank(r io.Reader) Bank {
 
 	}
 
-	for k, _ := range bank {
+	for k := range bank {
 		bank[k] = stripLine(bank[k])
 	}
 	return bank
@@ -79,7 +79,7 @@ func (b Bank) Query(key string, i ...interface{}) (string, error) {
 		return b.String(), nil
 	}
 
-	return "", fmt.Errorf("Bank.Query: no query with key %v", key)
+	return "", fmt.Errorf("no query with key %v", key)
 }
 
 // Strips excessive whitespace from a string

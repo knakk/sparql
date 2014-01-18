@@ -59,9 +59,9 @@ func LoadBank(r io.Reader) Bank {
 	return bank
 }
 
-// Query returns the query string given a key, and optionally a struct with
+// Prepare returns the query string given a key, and optionally a struct with
 // exported fields to be interpolated as variables into the query.
-func (b Bank) Query(key string, i ...interface{}) (string, error) {
+func (b Bank) Prepare(key string, i ...interface{}) (string, error) {
 
 	if q, ok := b[key]; ok {
 		if len(i) == 0 {

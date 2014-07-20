@@ -82,7 +82,7 @@ func (b Bank) Prepare(key string, i ...interface{}) (string, error) {
 	return "", fmt.Errorf("no query with key %v", key)
 }
 
-// Strips excessive whitespace from a string
+// stripLine strips excessive whitespace from a string
 func stripLine(l string) string {
 	return spaceMatcher.ReplaceAllString(l, " ")
 }

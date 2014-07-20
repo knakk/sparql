@@ -8,7 +8,8 @@ import (
 )
 
 const testBank = `
-# Some comment; should be ignored
+# Comments will be ignored, excepts those tagging a query
+
 # tag: q0
 SELECT * WHERE { ?s ?p ?o }
 

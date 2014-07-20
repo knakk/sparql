@@ -9,7 +9,7 @@ import (
 	"text/template"
 )
 
-// Bank is a map of SPARQL queries
+// Bank is a map of SPARQL queries.
 type Bank map[string]string
 
 var (
@@ -50,7 +50,6 @@ func LoadBank(r io.Reader) Bank {
 			b.WriteString(" ") // s.Scan() strips newlines, so ensure we got a whitespace instead
 			bank[key] = b.String()
 		}
-
 	}
 
 	for k := range bank {

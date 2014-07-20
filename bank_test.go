@@ -3,8 +3,6 @@ package sparql
 import (
 	"bytes"
 	"testing"
-
-	"github.com/knakk/specs"
 )
 
 const testBank = `
@@ -31,32 +29,48 @@ OFFSET {{.O}}
 `
 
 func TestLoadBank(t *testing.T) {
-	s := specs.New(t)
-
 	f := bytes.NewBufferString(testBank)
 	b := LoadBank(f)
 
-	s.Expect(3, len(b))
+	if len(b) != 3 {
+		t.Errorf("len(bank) => %d, want 3", len(b))
+	}
 }
 
 func TestBankPrepare(t *testing.T) {
-	s := specs.New(t)
-
 	f := bytes.NewBufferString(testBank)
 	b := LoadBank(f)
 
 	q0, err := b.Prepare("q0")
-	s.ExpectNil(err)
-	s.Expect("SELECT * WHERE { ?s ?p ?o } ", q0)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := "SELECT * WHERE { ?s ?p ?o } "
+	if q0 != want {
+		t.Errorf("got %v, want %v", q0, want)
+	}
 
 	q1, err := b.Prepare("q1", struct{ Subj string }{"http://example.org/s1"})
-	s.ExpectNil(err)
-	s.Expect("SELECT * WHERE { ?s ?p ?o FILTER(?s = <http://example.org/s1>) } ", q1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = "SELECT * WHERE { ?s ?p ?o FILTER(?s = <http://example.org/s1>) } "
+	if q1 != want {
+		t.Errorf("got %v, want %v", q1, want)
+	}
 
 	q2, err := b.Prepare("q2", struct{ L, O int }{10, 33})
-	s.ExpectNil(err)
-	s.Expect("SELECT ?s WHERE { ?s ?p ?o } LIMIT 10 OFFSET 33 ", q2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = "SELECT ?s WHERE { ?s ?p ?o } LIMIT 10 OFFSET 33 "
+	if q2 != want {
+		t.Errorf("got %v, want %v", q2, want)
+	}
 
 	_, err = b.Prepare("q3")
-	s.ExpectNotNil(err)
+	if err == nil {
+		t.Error("calling prepare() with a non-existing query should result in an error")
+	}
+
 }

@@ -128,6 +128,8 @@ func termFromJSON(b binding) (rdf.Term, error) {
 				return rdf.NewLiteralUnsafe(b.Value), nil
 			}
 			return rdf.NewLiteralUnsafe(t), nil
+		// TODO: other xsd dataypes
+		// TODO: custom datatypes
 		default:
 			return rdf.NewLiteralUnsafe(b.Value), nil
 		}

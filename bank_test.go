@@ -26,14 +26,22 @@ SELECT ?s
 WHERE { ?s ?p    ?o }
 LIMIT {{.L}}
 OFFSET {{.O}}
+
+# tag: myq
+SELECT *
+WHERE {
+	{ <{{.Res}}> ?p ?o }
+	UNION
+	{ ?s ?p <{{.Res}}> }
+}
 `
 
 func TestLoadBank(t *testing.T) {
 	f := bytes.NewBufferString(testBank)
 	b := LoadBank(f)
 
-	if len(b) != 3 {
-		t.Errorf("len(bank) => %d, want 3", len(b))
+	if len(b) != 4 {
+		t.Errorf("len(bank) => %d, want 4", len(b))
 	}
 }
 
@@ -66,6 +74,15 @@ func TestBankPrepare(t *testing.T) {
 	want = "SELECT ?s WHERE { ?s ?p ?o } LIMIT 10 OFFSET 33 "
 	if q2 != want {
 		t.Errorf("got %v, want %v", q2, want)
+	}
+
+	q3, err := b.Prepare("myq", struct{ Res string }{"http://r.com"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = "SELECT * WHERE { { <http://r.com> ?p ?o } UNION { ?s ?p <http://r.com> } } "
+	if q3 != want {
+		t.Errorf("got %v, want %v", q3, want)
 	}
 
 	_, err = b.Prepare("q3")

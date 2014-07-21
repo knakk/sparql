@@ -66,7 +66,7 @@ func (r *Results) Bindings() map[string][]rdf.Term {
 	return rb
 }
 
-// Solitions returns a slice of the query solutions, each containing a map
+// Solutions returns a slice of the query solutions, each containing a map
 // of all bindings to RDF terms.
 func (r *Results) Solutions() []map[string]rdf.Term {
 	var rs []map[string]rdf.Term

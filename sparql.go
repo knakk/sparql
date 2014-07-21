@@ -15,7 +15,7 @@ import (
 
 // DateFormat is the expected layout of the xsd:DateTime values. You can override
 // it if your triple store uses a different layout.
-var DateFormat = "2006-01-02T15:04:05-07:00"
+var DateFormat = time.RFC3339
 
 // Results holds the parsed results of a application/sparql-results+json response.
 type Results struct {

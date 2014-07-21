@@ -90,7 +90,8 @@ func TestSolutions(t *testing.T) {
 	}
 
 	s := r.Solutions()
-	rdf.DateFormat = "2006-01-02T15:04:05-07:00"
+	DateFormat = "2006-01-02T15:04:05-07:00"
+	rdf.DateFormat = DateFormat
 	loc, err := time.LoadLocation("Europe/Oslo")
 	if err != nil {
 		t.Fatal(err)

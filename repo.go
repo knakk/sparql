@@ -67,7 +67,7 @@ func (r *Repo) Query(q string) (*Results, error) {
 
 	req, err := http.NewRequest(
 		"POST",
-		s.endpoint,
+		r.endpoint,
 		bytes.NewBufferString(b))
 	if err != nil {
 		return nil, err

@@ -101,16 +101,15 @@ func TestSolutions(t *testing.T) {
 		got  rdf.Term
 		want rdf.Term
 	}{
-		{s[0]["x"], rdf.NewBlankUnsafe("r1")},
-		{s[0]["hpage"], rdf.NewURIUnsafe("http://work.example.org/alice/")},
-		{s[0]["name"], rdf.NewLiteralUnsafe("Alice")},
+		{s[0]["x"], rdf.Blank{ID: "r1"}},
+		{s[0]["hpage"], rdf.URI{URI: "http://work.example.org/alice/"}},
+		{s[0]["name"], rdf.Literal{Val: "Alice", DataType: rdf.XSDString}},
 		{s[1]["name"], rdf.NewLangLiteral("Bob", "en")},
-		{s[0]["age"], rdf.NewLiteralUnsafe(17)},
-		{s[0]["score"], rdf.NewLiteralUnsafe(0.2)},
-		{s[0]["z"], rdf.NewLiteralUnsafe(true)},
-		{s[1]["z"], rdf.NewLiteralUnsafe(false)},
-		{s[0]["updated"], rdf.NewLiteralUnsafe(
-			time.Date(2014, time.July, 21, 04, 0, 40, 0, loc))},
+		{s[0]["age"], rdf.Literal{Val: 17, DataType: rdf.XSDInteger}},
+		{s[0]["score"], rdf.Literal{Val: 0.2, DataType: rdf.XSDFloat}},
+		{s[0]["z"], rdf.Literal{Val: true, DataType: rdf.XSDBoolean}},
+		{s[1]["z"], rdf.Literal{Val: false, DataType: rdf.XSDBoolean}},
+		{s[0]["updated"], rdf.Literal{Val: time.Date(2014, time.July, 21, 04, 0, 40, 0, loc), DataType: rdf.XSDDateTime}},
 	}
 
 	for _, tt := range tests {

@@ -1,7 +1,6 @@
 // Package sparql contains functions and data structures for querying SPARQL
 // endpoints and parsing the response into RDF terms, as well as other
 // convenience functions for working with SPARQL queries.
-
 package sparql
 
 import (
@@ -91,48 +90,47 @@ func (r *Results) Solutions() []map[string]rdf.Term {
 func termFromJSON(b binding) (rdf.Term, error) {
 	switch b.Type {
 	case "bnode":
-		return rdf.NewBlankUnsafe(b.Value), nil
+		return rdf.Blank{ID: b.Value}, nil
 	case "uri":
-		return rdf.NewURIUnsafe(b.Value), nil
+		return rdf.URI{URI: b.Value}, nil
 	case "literal":
-		if b.Lang != "" {
-			return rdf.NewLangLiteral(b.Value, b.Lang), nil
-		}
 		// Untyped literals are typed as xsd:string
-		return rdf.NewLiteralUnsafe(b.Value), nil
+		if b.Lang != "" {
+			return rdf.Literal{Val: b.Value, Lang: b.Lang, DataType: rdf.XSDString}, nil
+		}
+		return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 	case "typed-literal":
 		switch b.DataType {
 		case rdf.XSDString.URI:
-			return rdf.NewLiteralUnsafe(b.Value), nil
+			return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 		case rdf.XSDInteger.URI:
 			i, err := strconv.Atoi(b.Value)
 			if err != nil {
-				return rdf.NewLiteralUnsafe(b.Value), nil
+				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 			}
-			return rdf.NewLiteralUnsafe(i), nil
+			return rdf.Literal{Val: i, DataType: rdf.XSDInteger}, nil
 		case rdf.XSDFloat.URI:
 			f, err := strconv.ParseFloat(b.Value, 64)
 			if err != nil {
-				return rdf.NewLiteralUnsafe(b.Value), nil
+				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 			}
-			return rdf.NewLiteralUnsafe(f), nil
+			return rdf.Literal{Val: f, DataType: rdf.XSDFloat}, nil
 		case rdf.XSDBoolean.URI:
 			bo, err := strconv.ParseBool(b.Value)
 			if err != nil {
-				return rdf.NewLiteralUnsafe(b.Value), nil
+				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 			}
-			return rdf.NewLiteralUnsafe(bo), nil
+			return rdf.Literal{Val: bo, DataType: rdf.XSDBoolean}, nil
 		case rdf.XSDDateTime.URI:
 			t, err := time.Parse(DateFormat, b.Value)
 			if err != nil {
-				println(err.Error())
-				return rdf.NewLiteralUnsafe(b.Value), nil
+				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 			}
-			return rdf.NewLiteralUnsafe(t), nil
+			return rdf.Literal{Val: t, DataType: rdf.XSDDateTime}, nil
 		// TODO: other xsd dataypes
 		// TODO: custom datatypes
 		default:
-			return rdf.NewLiteralUnsafe(b.Value), nil
+			return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
 		}
 	default:
 		return nil, errors.New("unknown term type")

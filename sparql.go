@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/knakk/rdf"
+	"github.com/knakk/rdf/xsd"
 )
 
 // DateFormat is the expected layout of the xsd:DateTime values. You can override
@@ -87,50 +88,51 @@ func (r *Results) Solutions() []map[string]rdf.Term {
 
 // termFromJSON converts a SPARQL json result binding into a rdf.Term. Any
 // parsing errors on typed-literal will result in a xsd:string-typed RDF term.
+// TODO move this functionality to package rdf?
 func termFromJSON(b binding) (rdf.Term, error) {
 	switch b.Type {
 	case "bnode":
 		return rdf.Blank{ID: b.Value}, nil
 	case "uri":
-		return rdf.URI{URI: b.Value}, nil
+		return rdf.IRI{IRI: b.Value}, nil
 	case "literal":
 		// Untyped literals are typed as xsd:string
 		if b.Lang != "" {
-			return rdf.Literal{Val: b.Value, Lang: b.Lang, DataType: rdf.XSDString}, nil
+			return rdf.Literal{Val: b.Value, Lang: b.Lang, DataType: xsd.String}, nil
 		}
-		return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
+		return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
 	case "typed-literal":
 		switch b.DataType {
-		case rdf.XSDString.URI:
-			return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
-		case rdf.XSDInteger.URI:
+		case xsd.String.IRI:
+			return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
+		case xsd.Integer.IRI:
 			i, err := strconv.Atoi(b.Value)
 			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
+				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
 			}
-			return rdf.Literal{Val: i, DataType: rdf.XSDInteger}, nil
-		case rdf.XSDFloat.URI:
+			return rdf.Literal{Val: i, DataType: xsd.Integer}, nil
+		case xsd.Float.IRI:
 			f, err := strconv.ParseFloat(b.Value, 64)
 			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
+				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
 			}
-			return rdf.Literal{Val: f, DataType: rdf.XSDFloat}, nil
-		case rdf.XSDBoolean.URI:
+			return rdf.Literal{Val: f, DataType: xsd.Float}, nil
+		case xsd.Boolean.IRI:
 			bo, err := strconv.ParseBool(b.Value)
 			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
+				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
 			}
-			return rdf.Literal{Val: bo, DataType: rdf.XSDBoolean}, nil
-		case rdf.XSDDateTime.URI:
+			return rdf.Literal{Val: bo, DataType: xsd.Boolean}, nil
+		case xsd.DateTime.IRI:
 			t, err := time.Parse(DateFormat, b.Value)
 			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
+				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
 			}
-			return rdf.Literal{Val: t, DataType: rdf.XSDDateTime}, nil
+			return rdf.Literal{Val: t, DataType: xsd.DateTime}, nil
 		// TODO: other xsd dataypes
 		// TODO: custom datatypes
 		default:
-			return rdf.Literal{Val: b.Value, DataType: rdf.XSDString}, nil
+			return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
 		}
 	default:
 		return nil, errors.New("unknown term type")

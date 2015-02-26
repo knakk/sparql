@@ -65,6 +65,8 @@ func (r *Repo) Query(q string) (*Results, error) {
 	form.Set("format", "application/sparql-results+json")
 	b := form.Encode()
 
+	// TODO make optional GET or Post, Query() should default GET (idempotent, cacheable)
+	// maybe new for updates: func (r *Repo) Update(q string) using POST?
 	req, err := http.NewRequest(
 		"POST",
 		r.endpoint,

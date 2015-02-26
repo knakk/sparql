@@ -7,16 +7,20 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 	"time"
 
 	"github.com/knakk/rdf"
-	"github.com/knakk/rdf/xsd"
 )
 
 // DateFormat is the expected layout of the xsd:DateTime values. You can override
 // it if your triple store uses a different layout.
 var DateFormat = time.RFC3339
+
+var xsdString rdf.IRI
+
+func init() {
+	xsdString, _ = rdf.NewIRI("http://www.w3.org/2001/XMLSchema#string")
+}
 
 // Results holds the parsed results of a application/sparql-results+json response.
 type Results struct {
@@ -92,48 +96,21 @@ func (r *Results) Solutions() []map[string]rdf.Term {
 func termFromJSON(b binding) (rdf.Term, error) {
 	switch b.Type {
 	case "bnode":
-		return rdf.Blank{ID: b.Value}, nil
+		return rdf.NewBlank(b.Value)
 	case "uri":
-		return rdf.IRI{IRI: b.Value}, nil
+		return rdf.NewIRI(b.Value)
 	case "literal":
 		// Untyped literals are typed as xsd:string
 		if b.Lang != "" {
-			return rdf.Literal{Val: b.Value, Lang: b.Lang, DataType: xsd.String}, nil
+			return rdf.NewLangLiteral(b.Value, b.Lang)
 		}
-		return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
+		return rdf.NewTypedLiteral(b.Value, xsdString), nil
 	case "typed-literal":
-		switch b.DataType {
-		case xsd.String.IRI:
-			return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
-		case xsd.Integer.IRI:
-			i, err := strconv.Atoi(b.Value)
-			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
-			}
-			return rdf.Literal{Val: i, DataType: xsd.Integer}, nil
-		case xsd.Float.IRI:
-			f, err := strconv.ParseFloat(b.Value, 64)
-			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
-			}
-			return rdf.Literal{Val: f, DataType: xsd.Float}, nil
-		case xsd.Boolean.IRI:
-			bo, err := strconv.ParseBool(b.Value)
-			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
-			}
-			return rdf.Literal{Val: bo, DataType: xsd.Boolean}, nil
-		case xsd.DateTime.IRI:
-			t, err := time.Parse(DateFormat, b.Value)
-			if err != nil {
-				return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
-			}
-			return rdf.Literal{Val: t, DataType: xsd.DateTime}, nil
-		// TODO: other xsd dataypes
-		// TODO: custom datatypes
-		default:
-			return rdf.Literal{Val: b.Value, DataType: xsd.String}, nil
+		iri, err := rdf.NewIRI(b.DataType)
+		if err != nil {
+			return nil, err
 		}
+		return rdf.NewTypedLiteral(b.Value, iri), nil
 	default:
 		return nil, errors.New("unknown term type")
 	}

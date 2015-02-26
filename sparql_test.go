@@ -3,10 +3,8 @@ package sparql
 import (
 	"bytes"
 	"testing"
-	"time"
 
 	"github.com/knakk/rdf"
-	"github.com/knakk/rdf/xsd"
 )
 
 const testResults = `
@@ -91,30 +89,33 @@ func TestSolutions(t *testing.T) {
 	}
 
 	s := r.Solutions()
-	DateFormat = "2006-01-02T15:04:05-07:00"
-	rdf.DateFormat = DateFormat
-	loc, err := time.LoadLocation("Europe/Oslo")
-	if err != nil {
-		t.Fatal(err)
-	}
+
+	blankR1, _ := rdf.NewBlank("r1")
+	iriAlice, _ := rdf.NewIRI("http://work.example.org/alice/")
+	litAlice, _ := rdf.NewLiteral("Alice")
+	litBob, _ := rdf.NewLangLiteral("Bob", "en")
+	xsdInteger, _ := rdf.NewIRI("http://www.w3.org/2001/XMLSchema#integer")
+	xsdFloat, _ := rdf.NewIRI("http://www.w3.org/2001/XMLSchema#float")
+	xsdBoolean, _ := rdf.NewIRI("http://www.w3.org/2001/XMLSchema#boolean")
+	xsdDateTime, _ := rdf.NewIRI("http://www.w3.org/2001/XMLSchema#dateTime")
 
 	var tests = []struct {
 		got  rdf.Term
 		want rdf.Term
 	}{
-		{s[0]["x"], rdf.Blank{ID: "r1"}},
-		{s[0]["hpage"], rdf.IRI{IRI: "http://work.example.org/alice/"}},
-		{s[0]["name"], rdf.Literal{Val: "Alice", DataType: xsd.String}},
-		{s[1]["name"], rdf.NewLangLiteral("Bob", "en")},
-		{s[0]["age"], rdf.Literal{Val: 17, DataType: xsd.Integer}},
-		{s[0]["score"], rdf.Literal{Val: 0.2, DataType: xsd.Float}},
-		{s[0]["z"], rdf.Literal{Val: true, DataType: xsd.Boolean}},
-		{s[1]["z"], rdf.Literal{Val: false, DataType: xsd.Boolean}},
-		{s[0]["updated"], rdf.Literal{Val: time.Date(2014, time.July, 21, 04, 0, 40, 0, loc), DataType: xsd.DateTime}},
+		{s[0]["x"], blankR1},
+		{s[0]["hpage"], iriAlice},
+		{s[0]["name"], litAlice},
+		{s[1]["name"], litBob},
+		{s[0]["age"], rdf.NewTypedLiteral("17", xsdInteger)},
+		{s[0]["score"], rdf.NewTypedLiteral("0.2", xsdFloat)},
+		{s[0]["z"], rdf.NewTypedLiteral("true", xsdBoolean)},
+		{s[1]["z"], rdf.NewTypedLiteral("false", xsdBoolean)},
+		{s[0]["updated"], rdf.NewTypedLiteral("2014-07-21T04:00:40+02:00", xsdDateTime)},
 	}
 
 	for _, tt := range tests {
-		if tt.got.String() != tt.want.String() {
+		if !rdf.TermsEqual(tt.got, tt.want) {
 			t.Errorf("Got \"%v\", want \"%v\"", tt.got, tt.want)
 		}
 	}

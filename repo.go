@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/knakk/digest"
+	"github.com/knakk/rdf"
 )
 
 // Repo represent a RDF repository, assumed to be
@@ -102,4 +103,46 @@ func (r *Repo) Query(q string) (*Results, error) {
 	}
 
 	return results, nil
+}
+
+// Construct performs a SPARQL HTTP request to the Repo, and returns the
+// result triples.
+func (r *Repo) Construct(q string) ([]rdf.Triple, error) {
+	form := url.Values{}
+	form.Set("query", q)
+	form.Set("format", "text/turtle")
+	b := form.Encode()
+
+	req, err := http.NewRequest(
+		"POST",
+		r.endpoint,
+		bytes.NewBufferString(b))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Content-Length", strconv.Itoa(len(b)))
+	req.Header.Set("Accept", "text/turtle")
+
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		b, err := ioutil.ReadAll(resp.Body)
+		var msg string
+		if err != nil {
+			msg = "Failed to read response body"
+		} else {
+			if strings.TrimSpace(string(b)) != "" {
+				msg = "Response body: \n" + string(b)
+			}
+		}
+		return nil, fmt.Errorf("Construct: SPARQL request failed: %s. "+msg, resp.Status)
+	}
+	dec := rdf.NewTripleDecoder(resp.Body, rdf.Turtle)
+	return dec.DecodeAll()
 }

@@ -63,7 +63,6 @@ func Timeout(t time.Duration) func(*Repo) error {
 func (r *Repo) Query(q string) (*Results, error) {
 	form := url.Values{}
 	form.Set("query", q)
-	form.Set("format", "application/sparql-results+json")
 	b := form.Encode()
 
 	// TODO make optional GET or Post, Query() should default GET (idempotent, cacheable)
@@ -78,6 +77,7 @@ func (r *Repo) Query(q string) (*Results, error) {
 
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Content-Length", strconv.Itoa(len(b)))
+	req.Header.Set("Accept", "application/sparql-results+json")
 
 	resp, err := r.client.Do(req)
 	if err != nil {

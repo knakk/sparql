@@ -42,7 +42,7 @@ The results returned by `Query` is a struct corresponding to the [`application/s
 
 ## Query bank
 
-The package includes a query bank implementaion. Write alle your query templates in string or in a separate file if you like, and tag each query with a name. You can then easily prepare queries by using the `Prepare` method along with an anonymous struct with variables to interpolate into the query.
+The package includes a query bank implementaion. Write all your query templates in string or in a separate file if you like, and tag each query with a name. You can then easily prepare queries by using the `Prepare` method along with an anonymous struct with variables to interpolate into the query.
 
 Example usage:
 

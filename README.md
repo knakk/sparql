@@ -36,13 +36,13 @@ The results returned by `Query` is a struct corresponding to the [`application/s
 
   `Bindings` returns a map of the bound variables in the SPARQL response, where each variable points to one or more RDF terms.
 
-- `res.Results.Solitions()`  -> `[]map[string]rdf.Term`
+- `res.Results.Solutions()`  -> `[]map[string]rdf.Term`
 
   `Solutions` returns a slice of the query solutions, each containing a map of all bindings to RDF terms.
 
 ## Query bank
 
-The package includes a query bank implementaion. Write all your query templates in string or in a separate file if you like, and tag each query with a name. You can then easily prepare queries by using the `Prepare` method along with an anonymous struct with variables to interpolate into the query.
+The package includes a query bank implementation. Write all your query templates in string or in a separate file if you like, and tag each query with a name. You can then easily prepare queries by using the `Prepare` method along with an anonymous struct with variables to interpolate into the query.
 
 Example usage:
 

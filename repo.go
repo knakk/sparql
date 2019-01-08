@@ -105,28 +105,11 @@ func (r *Repo) Query(q string) (*Results, error) {
 	return results, nil
 }
 
-// Construct performs a SPARQL HTTP query request to the Repo, and returns the
+// Construct performs a SPARQL HTTP request to the Repo, and returns the
 // result triples.
 func (r *Repo) Construct(q string) ([]rdf.Triple, error) {
-	resp, err := r.send("query", q)
-	if err != nil {
-		return nil, err
-	}
-	dec := rdf.NewTripleDecoder(resp.Body, rdf.Turtle)
-	return dec.DecodeAll()
-}
-
-// Update performs a SPARQL HTTP update request to the Repo.
-func (r *Repo) Update(q string) error {
-	_, err := r.send("update", q)
-	return err
-}
-
-// send performs a SPARQL HTTP request to the Repo, and returns the
-// HTTP response.
-func (r *Repo) send(param string, q string) (*http.Response, error) {
 	form := url.Values{}
-	form.Set(param, q)
+	form.Set("query", q)
 	form.Set("format", "text/turtle")
 	b := form.Encode()
 
@@ -158,7 +141,8 @@ func (r *Repo) send(param string, q string) (*http.Response, error) {
 				msg = "Response body: \n" + string(b)
 			}
 		}
-		return nil, fmt.Errorf("send: %s SPARQL request failed: %s. "+msg, param, resp.Status)
+		return nil, fmt.Errorf("Construct: SPARQL request failed: %s. "+msg, resp.Status)
 	}
-	return resp, nil
+	dec := rdf.NewTripleDecoder(resp.Body, rdf.Turtle)
+	return dec.DecodeAll()
 }

@@ -2,6 +2,7 @@ package sparql
 
 import (
 	"bytes"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -46,6 +47,29 @@ func (r *Repo) SetOption(options ...func(*Repo) error) error {
 func DigestAuth(username, password string) func(*Repo) error {
 	return func(r *Repo) error {
 		r.client.Transport = digest.NewTransport(username, password)
+		return nil
+	}
+}
+
+type basicAuthTransport struct {
+	Username string
+	Password string
+}
+
+func (bat basicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Authorization", fmt.Sprintf("Basic %s",
+		base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s",
+			bat.Username, bat.Password)))))
+	return http.DefaultTransport.RoundTrip(req)
+}
+
+// BasicAuth configures Repo to use basic authentication on HTTP requests.
+func BasicAuth(username, password string) func(*Repo) error {
+	return func(r *Repo) error {
+		r.client.Transport = basicAuthTransport{
+			Username: username,
+			Password: password,
+		}
 		return nil
 	}
 }

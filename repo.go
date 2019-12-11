@@ -194,7 +194,7 @@ func (r *Repo) Update(q string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusNoContent {
 		b, err := ioutil.ReadAll(resp.Body)
 		var msg string
 		if err != nil {

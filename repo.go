@@ -15,6 +15,22 @@ import (
 	"github.com/knakk/rdf"
 )
 
+// Provider provides an interface for the
+// client to implement a generic request matching
+// the sparql endpoint they are using
+type Provider interface {
+	GenRequest(endpoint string) (*http.Request, error)
+}
+
+// GenericCall contains the query to execute and fulfils the
+// generic request provider interface thanks to the GenRequest function.
+//
+// To override the request format, the client must declare a
+// new struct which fulfils the Provider interface
+type GenericCall struct {
+	Query string
+}
+
 // Repo represent a RDF repository, assumed to be
 // queryable via the SPARQL protocol over HTTP.
 type Repo struct {
@@ -82,18 +98,17 @@ func Timeout(t time.Duration) func(*Repo) error {
 	}
 }
 
-// Query performs a SPARQL HTTP request to the Repo, and returns the
-// parsed application/sparql-results+json response.
-func (r *Repo) Query(q string) (*Results, error) {
+// GenRequest is the generic sparql api request
+func (call GenericCall) GenRequest(endpoint string) (*http.Request, error) {
 	form := url.Values{}
-	form.Set("query", q)
+	form.Set("query", call.Query)
 	b := form.Encode()
 
 	// TODO make optional GET or Post, Query() should default GET (idempotent, cacheable)
 	// maybe new for updates: func (r *Repo) Update(q string) using POST?
 	req, err := http.NewRequest(
 		"POST",
-		r.endpoint,
+		endpoint,
 		bytes.NewBufferString(b))
 	if err != nil {
 		return nil, err
@@ -102,6 +117,37 @@ func (r *Repo) Query(q string) (*Results, error) {
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Content-Length", strconv.Itoa(len(b)))
 	req.Header.Set("Accept", "application/sparql-results+json")
+
+	return req, err
+}
+
+// Query performs a SPARQL HTTP request to the Repo, and returns the
+// parsed application/sparql-results+json response.
+//
+// The function accepts either a query in string format, or a struct
+// which fulfils the Provider interface and matches the GenericCall struct
+func (r *Repo) Query(queryProvider interface{}) (*Results, error) {
+
+	var req *http.Request
+	var err error
+
+	if p, ok := queryProvider.(Provider); ok {
+		req, err = p.GenRequest(r.endpoint)
+	}
+
+	if s, ok := queryProvider.(string); ok {
+		var p GenericCall
+		p.Query = s
+		req, err = p.GenRequest(r.endpoint)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if req == nil {
+		return nil, fmt.Errorf("Request failed: no http.Request provided. ")
+	}
 
 	resp, err := r.client.Do(req)
 	if err != nil {

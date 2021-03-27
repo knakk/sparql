@@ -19,7 +19,7 @@ import (
 // client to implement a generic request matching
 // the sparql endpoint they are using
 type Provider interface {
-	GenRequest(endpoint string) (*http.Request, error)
+	GenRequest(endpoint, method string) (*http.Request, error)
 }
 
 // GenericCall contains the query to execute and fulfils the
@@ -99,15 +99,13 @@ func Timeout(t time.Duration) func(*Repo) error {
 }
 
 // GenRequest is the generic sparql api request
-func (call GenericCall) GenRequest(endpoint string) (*http.Request, error) {
+func (call GenericCall) GenRequest(endpoint, method string) (*http.Request, error) {
 	form := url.Values{}
 	form.Set("query", call.Query)
 	b := form.Encode()
 
-	// TODO make optional GET or Post, Query() should default GET (idempotent, cacheable)
-	// maybe new for updates: func (r *Repo) Update(q string) using POST?
 	req, err := http.NewRequest(
-		"POST",
+		method,
 		endpoint,
 		bytes.NewBufferString(b))
 	if err != nil {
@@ -125,20 +123,28 @@ func (call GenericCall) GenRequest(endpoint string) (*http.Request, error) {
 // parsed application/sparql-results+json response.
 //
 // The function accepts either a query in string format, or a struct
-// which fulfils the Provider interface and matches the GenericCall struct
-func (r *Repo) Query(queryProvider interface{}) (*Results, error) {
-
+// which fulfils the Provider interface and matches the GenericCall struct.
+//
+// Additionally, this function accepts a boolean signifying whether or not
+// query only reads data (and, thus, can be made with a GET request which
+// can be cached), or whether we need to POST
+func (r *Repo) Query(queryProvider interface{}, readonly bool) (*Results, error) {
 	var req *http.Request
 	var err error
 
+	var method = "POST"
+	if readonly {
+		method = "GET"
+	}
+
 	if p, ok := queryProvider.(Provider); ok {
-		req, err = p.GenRequest(r.endpoint)
+		req, err = p.GenRequest(r.endpoint, method)
 	}
 
 	if s, ok := queryProvider.(string); ok {
 		var p GenericCall
 		p.Query = s
-		req, err = p.GenRequest(r.endpoint)
+		req, err = p.GenRequest(r.endpoint, method)
 	}
 
 	if err != nil {
@@ -167,6 +173,7 @@ func (r *Repo) Query(queryProvider interface{}) (*Results, error) {
 		}
 		return nil, fmt.Errorf("Query: SPARQL request failed: %s. "+msg, resp.Status)
 	}
+
 	results, err := ParseJSON(resp.Body)
 	if err != nil {
 		return nil, err

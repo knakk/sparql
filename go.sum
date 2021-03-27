@@ -2,3 +2,5 @@ github.com/anglo-korean/digest v0.0.0-20210327071103-bebe1ae50008 h1:H4ZG4AAJ5w1
 github.com/anglo-korean/digest v0.0.0-20210327071103-bebe1ae50008/go.mod h1:8CJkBb4nllCU40QnJgavz4q28Wdwj0b5TVQUroGcGBE=
 github.com/anglo-korean/rdf v0.0.0-20210327070916-93fe8828a7cb h1:EMgKKl++WwefWyqAwhmojppuDjzPK61pRyKuwx2eqkc=
 github.com/anglo-korean/rdf v0.0.0-20210327070916-93fe8828a7cb/go.mod h1:AzbsZ7qlds+UW4UuSr6P9of5i0jB+HaEgTCd97JqlpQ=
+github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79 h1:+ngKgrYPPJrOjhax5N+uePQ0Fh1Z7PheYoUI/0nzkPA=
+github.com/gregjones/httpcache v0.0.0-20190611155906-901d90724c79/go.mod h1:FecbI9+v66THATjSRHfNgh1IVFe/9kFxbXtjV0ctIMA=

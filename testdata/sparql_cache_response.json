@@ -1,0 +1,34 @@
+{
+        "head": {
+                "vars": [
+                        "item",
+                        "itemLabel"
+                ]
+        },
+        "results": {
+                "bindings": [
+                        {
+                                "item": {
+                                        "type": "uri",
+                                        "value": "http://www.wikidata.org/entity/Q378619"
+                                },
+                                "itemLabel": {
+                                        "xml:lang": "en",
+                                        "type": "literal",
+                                        "value": "CC"
+                                }
+                        },
+                        {
+                                "item": {
+                                        "type": "uri",
+                                        "value": "http://www.wikidata.org/entity/Q498787"
+                                },
+                                "itemLabel": {
+                                        "xml:lang": "en",
+                                        "type": "literal",
+                                        "value": "Muezza"
+                                }
+                        }
+                ]
+        }
+}

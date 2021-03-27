@@ -14,7 +14,7 @@ repo, err := sparql.NewRepo("http://localhost:8890/sparql-auth",
   sparql.Timeout(time.Millisecond*1500),
 )
 if err != nil {
-	log.Fatal(err)
+    panic(err)
 }
 ```
 
@@ -22,7 +22,7 @@ Issue a SPARQL query to the repository:
 ```go
 res, err := repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1")
 if err != nil {
-	log.Fatal(err)
+    panic(err)
 }
 ```
 
@@ -32,11 +32,11 @@ See also the section below on using a query bank.
 
 The results returned by `Query` is a struct corresponding to the [`application/sparql-results+json`](http://www.w3.org/TR/rdf-sparql-json-res/)-data as returned by the SPARQL endpoint. To further work with the result set in [`rdf.Term`](https://github.com/knakk/rdf) format you can call either of these two methods on the results, `res` being the result returned by `Query`:
 
-- `res.Results.Bindings()` -> `map[string][]rdf.Term`
+- `res.Bindings()` -> `map[string][]rdf.Term`
 
   `Bindings` returns a map of the bound variables in the SPARQL response, where each variable points to one or more RDF terms.
 
-- `res.Results.Solutions()`  -> `[]map[string]rdf.Term`
+- `res.Solutions()`  -> `[]map[string]rdf.Term`
 
   `Solutions` returns a slice of the query solutions, each containing a map of all bindings to RDF terms.
 
@@ -58,11 +58,11 @@ WHERE {
 `
 
 f := bytes.NewBufferString(queries)
-bank := LoadBank(f)
+bank := sparql.LoadBank(f)
 
 q, err := bank.Prepare("my-query", struct{ Limit, Offset int }{10, 100})
 if err != nil {
-	log.Fatal(err)
+    panic(err)
 }
 
 
@@ -70,5 +70,3 @@ fmt.Println(q)
 // Will print: "SELECT * WHERE { ?s ?p ?o } LIMIT 10 OFFSET 100"
 
 ```
-
-

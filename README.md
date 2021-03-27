@@ -2,9 +2,18 @@
 
 Go package that contains functions and data structures for querying SPARQL endpoints and parsing the response into RDF terms, as well as other convenience functions for working with SPARQL queries.
 
+## On https://github.com/knakk/sparql
+
+The source of this fork, https://github.com/knakk/sparql, has a number of characterstics which make it unattractive to us (and perhaps others).
+
+1. The licence is non-OCI, is untested in any way. Aleister Crowley is not a great source for legal policy
+   1. This repo, and other repos we fork to use, have been granted the MIT Licence. Relicencing seems to be within the spirit of the original licence but frankly: who even knows?
+1. There is no `go.mod` file which makes versioning of dependencies flakey
+1. The docs aren't great
+
+Thus, this fork.
+
 ## Interacting with SPARQL endpoints
-
-
 
 This snippet creates a RDF repository instance to interact with a SPARQL endpoint running on localhost, set up with HTTP digest authentication and a timeout of 1.5s:
 

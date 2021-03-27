@@ -9,7 +9,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/knakk/rdf"
+	"github.com/anglo-korean/rdf"
 )
 
 // DateFormat is the expected layout of the xsd:DateTime values. You can override

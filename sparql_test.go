@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/knakk/rdf"
+	"github.com/anglo-korean/rdf"
 )
 
 const testResults = `

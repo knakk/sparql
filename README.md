@@ -39,7 +39,7 @@ See also the section below on using a query bank.
 
 ## Working with SPARQL result sets
 
-The results returned by `Query` is a struct corresponding to the [`application/sparql-results+json`](http://www.w3.org/TR/rdf-sparql-json-res/)-data as returned by the SPARQL endpoint. To further work with the result set in [`rdf.Term`](https://github.com/knakk/rdf) format you can call either of these two methods on the results, `res` being the result returned by `Query`:
+The results returned by `Query` is a struct corresponding to the [`application/sparql-results+json`](http://www.w3.org/TR/rdf-sparql-json-res/)-data as returned by the SPARQL endpoint. To further work with the result set in [`rdf.Term`](https://github.com/anglo-korean/rdf) format you can call either of these two methods on the results, `res` being the result returned by `Query`:
 
 - `res.Bindings()` -> `map[string][]rdf.Term`
 

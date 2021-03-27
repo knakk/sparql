@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/knakk/digest"
-	"github.com/knakk/rdf"
+	"github.com/anglo-korean/digest"
+	"github.com/anglo-korean/rdf"
 )
 
 // Provider provides an interface for the

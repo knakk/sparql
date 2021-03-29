@@ -28,8 +28,8 @@ func WithCache(c httpcache.Cache) func(*Repo) error {
 	}
 }
 
-// DigestAuth configures Repo to use digest authentication on HTTP requests.
-func DigestAuth(username, password string) func(*Repo) error {
+// WithDigestAuth configures Repo to use digest authentication on HTTP requests.
+func WithDigestAuth(username, password string) func(*Repo) error {
 	return func(r *Repo) error {
 		r.client.Transport = digest.NewTransport(username, password)
 		return nil
@@ -48,8 +48,8 @@ func (bat basicAuthTransport) RoundTrip(req *http.Request) (*http.Response, erro
 	return http.DefaultTransport.RoundTrip(req)
 }
 
-// BasicAuth configures Repo to use basic authentication on HTTP requests.
-func BasicAuth(username, password string) func(*Repo) error {
+// WithBasicAuth configures Repo to use basic authentication on HTTP requests.
+func WithBasicAuth(username, password string) func(*Repo) error {
 	return func(r *Repo) error {
 		r.client.Transport = basicAuthTransport{
 			Username: username,
@@ -59,8 +59,8 @@ func BasicAuth(username, password string) func(*Repo) error {
 	}
 }
 
-// Timeout instructs the underlying HTTP transport to timeout after given duration.
-func Timeout(t time.Duration) func(*Repo) error {
+// WithTimeout instructs the underlying HTTP transport to timeout after given duration.
+func WithTimeout(t time.Duration) func(*Repo) error {
 	return func(r *Repo) error {
 		r.client.Timeout = t
 		return nil

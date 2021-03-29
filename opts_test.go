@@ -50,7 +50,7 @@ date: Sat, 27 Mar 2021 08:35:34 GMT
 		t.Run(test.name, func(t *testing.T) {
 			repo, _ := NewRepo("https://example.com/404", WithCache(test.cache))
 
-			_, err := repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1", true)
+			_, err := repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1")
 			if test.expectError && err == nil {
 				t.Errorf("expected error")
 			} else if !test.expectError && err != nil {

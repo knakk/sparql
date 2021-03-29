@@ -1,4 +1,4 @@
-package sparql
+package repo
 
 import (
 	"fmt"
@@ -24,7 +24,7 @@ func (c *testCache) Set(key string, responseBytes []byte) {
 func (_ testCache) Delete(_ string) {}
 
 func TestWithCache(t *testing.T) {
-	jsonBody, err := ioutil.ReadFile("testdata/sparql_cache_response.json")
+	jsonBody, err := ioutil.ReadFile("../testdata/sparql_cache_response.json")
 	if err != nil {
 		t.Fatalf("unexpected error: %#v", err)
 	}
@@ -48,9 +48,9 @@ date: Sat, 27 Mar 2021 08:35:34 GMT
 		{"Not in cache, request 404s", httpcache.NewMemoryCache(), true},
 	} {
 		t.Run(test.name, func(t *testing.T) {
-			repo, _ := NewRepo("https://example.com/404", WithCache(test.cache))
+			repo, _ := New("https://example.com/404", WithCache(test.cache))
 
-			_, err := repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1", true)
+			_, err := repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1")
 			if test.expectError && err == nil {
 				t.Errorf("expected error")
 			} else if !test.expectError && err != nil {

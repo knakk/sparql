@@ -1,4 +1,4 @@
-package sparql
+package bank
 
 import (
 	"bytes"
@@ -30,15 +30,15 @@ OFFSET {{.O}}
 # tag: myq
 SELECT *
 WHERE {
-	{ <{{.Res}}> ?p ?o }
-	UNION
-	{ ?s ?p <{{.Res}}> }
+    { <{{.Res}}> ?p ?o }
+    UNION
+    { ?s ?p <{{.Res}}> }
 }
 `
 
-func TestLoadBank(t *testing.T) {
+func TestLoad(t *testing.T) {
 	f := bytes.NewBufferString(testBank)
-	b := LoadBank(f)
+	b := Load(f)
 
 	if len(b) != 4 {
 		t.Errorf("len(bank) => %d, want 4", len(b))
@@ -47,7 +47,7 @@ func TestLoadBank(t *testing.T) {
 
 func TestBankPrepare(t *testing.T) {
 	f := bytes.NewBufferString(testBank)
-	b := LoadBank(f)
+	b := Load(f)
 
 	q0, err := b.Prepare("q0")
 	if err != nil {

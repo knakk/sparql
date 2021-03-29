@@ -7,7 +7,7 @@ import (
 	"github.com/anglo-korean/rdf"
 )
 
-const testResults = `
+const validSparql = `
 {
    "head": {
        "link": [],
@@ -43,13 +43,34 @@ const testResults = `
        }
 }`
 
-func TestParseJSON(t *testing.T) {
-	b := bytes.NewBufferString(testResults)
-	r, err := ParseJSON(b)
+func TestParseBytes(t *testing.T) {
+	r, err := ParseBytes([]byte(validSparql))
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	testResults(t, r)
+}
+
+func TestParseString(t *testing.T) {
+	r, err := ParseString(validSparql)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testResults(t, r)
+}
+
+func TestParse(t *testing.T) {
+	r, err := Parse(bytes.NewBufferString(validSparql))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	testResults(t, r)
+}
+
+func testResults(t *testing.T, r *Results) {
 	if len(r.Results.Bindings) != 2 {
 		t.Errorf("Got %d solutions, want 2", len(r.Results.Bindings))
 	}
@@ -60,8 +81,8 @@ func TestParseJSON(t *testing.T) {
 }
 
 func TestBindings(t *testing.T) {
-	b := bytes.NewBufferString(testResults)
-	r, err := ParseJSON(b)
+	b := bytes.NewBufferString(validSparql)
+	r, err := Parse(b)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,8 +103,8 @@ func TestBindings(t *testing.T) {
 }
 
 func TestSolutions(t *testing.T) {
-	b := bytes.NewBufferString(testResults)
-	r, err := ParseJSON(b)
+	b := bytes.NewBufferString(validSparql)
+	r, err := Parse(b)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,4 +1,4 @@
-package sparql
+package repo
 
 import (
 	"bytes"
@@ -8,19 +8,21 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/anglo-korean/sparql"
 )
 
-// Repo represent a RDF repository, assumed to be
+// Repo represents a RDF repository, assumed to be
 // queryable via the SPARQL protocol over HTTP.
 type Repo struct {
 	endpoint string
 	client   *http.Client
 }
 
-// NewRepo creates a new representation of a RDF repository. It takes a
+// New creates a new representation of a RDF repository. It takes a
 // variadic list of functional options which can alter the configuration
 // of the repository.
-func NewRepo(addr string, options ...func(*Repo) error) (r *Repo, err error) {
+func New(addr string, options ...func(*Repo) error) (r *Repo, err error) {
 	r = &Repo{
 		endpoint: addr,
 		client:   http.DefaultClient,
@@ -46,7 +48,7 @@ func (r *Repo) SetOption(options ...func(*Repo) error) error {
 //
 // These lookups are expected to be idempotent, and as such use http.MethodGet requests.
 // See: Repo.Update for requests which use http.MethodPost
-func (r Repo) Query(query string) (*Results, error) {
+func (r Repo) Query(query string) (*sparql.Results, error) {
 	return r.query(http.MethodGet, query)
 }
 
@@ -59,13 +61,13 @@ func (r Repo) Query(query string) (*Results, error) {
 // Functionally these requests differ very little from requests made via Repo.Query;
 // and in fact  there's nothing that says a POST'd request *must* update state.
 // The difference is purely to allow for the caching of GET requests
-func (r Repo) Update(query string) (*Results, error) {
+func (r Repo) Update(query string) (*sparql.Results, error) {
 	return r.query(http.MethodPost, query)
 }
 
 // query performs the actual heavy lifting of querying an endpoint and parsing
 // responses
-func (r Repo) query(verb, query string) (res *Results, err error) {
+func (r Repo) query(verb, query string) (res *sparql.Results, err error) {
 	req, err := createRequest(r.endpoint, verb, query)
 	if err != nil {
 		return
@@ -93,7 +95,7 @@ func (r Repo) query(verb, query string) (res *Results, err error) {
 		return nil, fmt.Errorf("sparql request failed: %s. %s", resp.Status, msg)
 	}
 
-	return ParseJSON(resp.Body)
+	return sparql.Parse(resp.Body)
 }
 
 // createRequest creates an *http.Request from the endpoint url, the http verb,

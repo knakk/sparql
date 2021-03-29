@@ -1,4 +1,4 @@
-package sparql
+package repo
 
 import (
 	"encoding/base64"

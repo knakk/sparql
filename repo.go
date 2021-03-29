@@ -2,16 +2,13 @@ package sparql
 
 import (
 	"bytes"
-	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/anglo-korean/digest"
 	"github.com/anglo-korean/rdf"
 )
 
@@ -57,45 +54,6 @@ func (r *Repo) SetOption(options ...func(*Repo) error) error {
 		}
 	}
 	return nil
-}
-
-// DigestAuth configures Repo to use digest authentication on HTTP requests.
-func DigestAuth(username, password string) func(*Repo) error {
-	return func(r *Repo) error {
-		r.client.Transport = digest.NewTransport(username, password)
-		return nil
-	}
-}
-
-type basicAuthTransport struct {
-	Username string
-	Password string
-}
-
-func (bat basicAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	req.Header.Set("Authorization", fmt.Sprintf("Basic %s",
-		base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s",
-			bat.Username, bat.Password)))))
-	return http.DefaultTransport.RoundTrip(req)
-}
-
-// BasicAuth configures Repo to use basic authentication on HTTP requests.
-func BasicAuth(username, password string) func(*Repo) error {
-	return func(r *Repo) error {
-		r.client.Transport = basicAuthTransport{
-			Username: username,
-			Password: password,
-		}
-		return nil
-	}
-}
-
-// Timeout instructs the underlying HTTP transport to timeout after given duration.
-func Timeout(t time.Duration) func(*Repo) error {
-	return func(r *Repo) error {
-		r.client.Timeout = t
-		return nil
-	}
 }
 
 // GenRequest is the generic sparql api request

@@ -1,6 +1,3 @@
-// Package sparql contains functions and data structures for querying SPARQL
-// endpoints and parsing the response into RDF terms, as well as other
-// convenience functions for working with SPARQL queries.
 package sparql
 
 import (

@@ -1,81 +1,80 @@
+[![GoDoc](https://img.shields.io/badge/pkg.go.dev-doc-blue)](http://pkg.go.dev/github.com/anglo-korean/sparql)
+[![Go Report Card](https://goreportcard.com/badge/.)](https://goreportcard.com/report/github.com/anglo-korean/sparql)
 # sparql
 
-Go package that contains functions and data structures for querying SPARQL endpoints and parsing the response into RDF terms, as well as other convenience functions for working with SPARQL queries.
+Package sparql provides a series of parsers for turning SPARQL JSON
+(mime type: application/sparql-results+json only- this package doesn't
+touch xml) into useful go data types.
 
-## On https://github.com/knakk/sparql
+Within this package there are two subpackages:
 
-The source of this fork, https://github.com/knakk/sparql, has a number of characterstics which make it unattractive to us (and perhaps others).
+1. github.com/anglo-korean/sparql/bank - a sparql 'query bank' (though realistically I guess this may work for other well-formed data) with `text/template` support
+2. github.com/anglo-korean/sparql/repo - a sparql respository client, with various helpers such as auth, and caching
 
-1. The licence is non-OCI, is untested in any way. Aleister Crowley is not a great source for legal policy
-   1. This repo, and other repos we fork to use, have been granted the MIT Licence. Relicencing seems to be within the spirit of the original licence but frankly: who even knows?
-1. There is no `go.mod` file which makes versioning of dependencies flakey
-1. The docs aren't great
-
-Thus, this fork.
-
-## Interacting with SPARQL endpoints
-
-This snippet creates a RDF repository instance to interact with a SPARQL endpoint running on localhost, set up with HTTP digest authentication and a timeout of 1.5s:
+This package is simple to use, stable, and relatively quick. It accepts some json, in `string`, `[]byte`, or `io.Reader` form, and returns some rdf terms:
 
 ```go
-repo, err := sparql.NewRepo("http://localhost:8890/sparql-auth",
-  sparql.DigestAuth("dba", "dba"),
-  sparql.Timeout(time.Millisecond*1500),
+package main
+
+import (
+    "fmt"
+
+    "github.com/anglo-korean/sparql"
 )
-if err != nil {
-    panic(err)
+
+var data = `{"head":{"vars":["item","itemLabel"]},"results":{"bindings":[{"item":{"type":"uri","value":"[http://www.wikidata.org/entity/Q378619](http://www.wikidata.org/entity/Q378619)"},"itemLabel":{"xml:lang":"en","type":"literal","value":"CC"}},{"item":{"type":"uri","value":"[http://www.wikidata.org/entity/Q498787](http://www.wikidata.org/entity/Q498787)"},"itemLabel":{"xml:lang":"en","type":"literal","value":"Muezza"}}]}}`
+
+func main() {
+    res, err := sparql.ParseString(data)
+    if err != nil {
+        return
+    }
+
+    fmt.Printf("%!(NOVERB)v\n", res.Solutions())
 }
 ```
 
-Issue a SPARQL query to the repository:
-```go
-res, err := repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1")
-if err != nil {
-    panic(err)
-}
-```
-
-See also the section below on using a query bank.
-
-## Working with SPARQL result sets
-
-The results returned by `Query` is a struct corresponding to the [`application/sparql-results+json`](http://www.w3.org/TR/rdf-sparql-json-res/)-data as returned by the SPARQL endpoint. To further work with the result set in [`rdf.Term`](https://github.com/anglo-korean/rdf) format you can call either of these two methods on the results, `res` being the result returned by `Query`:
-
-- `res.Bindings()` -> `map[string][]rdf.Term`
-
-  `Bindings` returns a map of the bound variables in the SPARQL response, where each variable points to one or more RDF terms.
-
-- `res.Solutions()`  -> `[]map[string]rdf.Term`
-
-  `Solutions` returns a slice of the query solutions, each containing a map of all bindings to RDF terms.
-
-## Query bank
-
-The package includes a query bank implementation. Write all your query templates in string or in a separate file if you like, and tag each query with a name. You can then easily prepare queries by using the `Prepare` method along with an anonymous struct with variables to interpolate into the query.
-
-Example usage:
+Or, to query data using the provided client:
 
 ```go
-const queries = `
-# Comments are ignored, except those tagging a query.
+package main
 
-# tag: my-query
-SELECT *
-WHERE {
-  ?s ?p ?o
-} LIMIT {{.Limit}} OFFSET {{.Offset}}
-`
+import (
+    "fmt"
 
-f := bytes.NewBufferString(queries)
-bank := sparql.LoadBank(f)
+    "github.com/anglo-korean/sparql/repo"
+)
 
-q, err := bank.Prepare("my-query", struct{ Limit, Offset int }{10, 100})
-if err != nil {
-    panic(err)
+func main() {
+    client, err := repo.New("[https://example.com](https://example.com)")
+    if err != nil {
+        return
+    }
+
+    res, err := client.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1")
+    if err != nil {
+        return
+    }
+
+    fmt.Printf("%!(NOVERB)v\n", res.Solutions())
 }
-
-
-fmt.Println(q)
-// Will print: "SELECT * WHERE { ?s ?p ?o } LIMIT 10 OFFSET 100"
-
 ```
+
+Note that the client provided in repo parses returned json autiomatically.
+(Further documentation for both the repo client and the query bank may be found in those specific packages)
+
+Parsed results are parsed into a sparql.Results type, which contains two functions used for accessing data:
+
+1. `res.Bindings()` -> `map[string][]rdf.Term`
+2. `res.Solutions()`  -> `[]map[string]rdf.Term`
+
+An example of working with this data may be found in the examples directory
+
+## Sub Packages
+
+* [bank](./bank): Package bank provides a query bank for sparql queries.
+
+* [repo](./repo): Package repo provides a simple http client for interacting with sparql endpoints.
+
+---
+Readme created from Go doc with [goreadme](https://github.com/posener/goreadme)

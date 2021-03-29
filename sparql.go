@@ -4,9 +4,11 @@
 package sparql
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
+	"strings"
 	"time"
 
 	"github.com/anglo-korean/rdf"
@@ -46,13 +48,27 @@ type binding struct {
 	DataType string
 }
 
-// ParseJSON takes an application/sparql-results+json response and parses it
-// into a Results struct.
-func ParseJSON(r io.Reader) (*Results, error) {
-	var res Results
-	err := json.NewDecoder(r).Decode(&res)
+// ParseBytes takes a bytes containing valid sparql-results+json and
+// returns a set of Results
+func ParseBytes(b []byte) (*Results, error) {
+	return Parse(bytes.NewReader(b))
+}
 
-	return &res, err
+// ParseString takes a string containing valid sparql-results+json and
+// returns a set of Results
+func ParseString(s string) (*Results, error) {
+	return Parse(strings.NewReader(s))
+}
+
+// Parse takes an application/sparql-results+json response as an
+// io.Reader (like from an http.Response.Body) and parses it
+// into a Results struct
+func Parse(r io.Reader) (res *Results, err error) {
+	res = new(Results)
+
+	err = json.NewDecoder(r).Decode(res)
+
+	return
 }
 
 // Bindings returns a map of the bound variables in the SPARQL response, where

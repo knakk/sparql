@@ -3,6 +3,7 @@ package repo
 import (
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"testing"
 
 	"github.com/gregjones/httpcache"
@@ -22,6 +23,25 @@ func (c *testCache) Set(key string, responseBytes []byte) {
 }
 
 func (_ testCache) Delete(_ string) {}
+
+type dummyRT struct {
+	req    *http.Request
+	status int
+	err    bool
+}
+
+func (r *dummyRT) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	resp = new(http.Response)
+	resp.StatusCode = r.status
+
+	r.req = req
+
+	if r.err {
+		err = fmt.Errorf("an error")
+	}
+
+	return
+}
 
 func TestWithCache(t *testing.T) {
 	jsonBody, err := ioutil.ReadFile("../testdata/sparql_cache_response.json")
@@ -57,5 +77,22 @@ date: Sat, 27 Mar 2021 08:35:34 GMT
 				t.Errorf("unexpected error: %#v", err)
 			}
 		})
+	}
+}
+
+func TestWithHeader(t *testing.T) {
+	repo, _ := New("https://example.com/404")
+
+	rt := &dummyRT{status: 200}
+	repo.client.Transport = rt
+
+	repo.SetOption(WithHeader("hello", "world"))
+
+	repo.Query("SELECT * WHERE { ?s ?p ?o } LIMIT 1")
+
+	got := rt.req.Header.Get("hello")
+
+	if got != "world" {
+		t.Errorf(`expected "world", recived %q`, got)
 	}
 }

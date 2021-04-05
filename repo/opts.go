@@ -66,3 +66,34 @@ func WithTimeout(t time.Duration) func(*Repo) error {
 		return nil
 	}
 }
+
+type customHeader struct {
+	key, value string
+	rt         http.RoundTripper
+}
+
+func (h customHeader) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set(h.key, h.value)
+
+	return h.rt.RoundTrip(req)
+}
+
+// WithHeader sets a header on requests to a repo
+//
+// These headers can be chained, both with themselves and
+// with another set of repo opts, such as
+//
+//    repo, err := repo.New("https://example.com", repo.WithCache(c), repo.WithHeader("max-age", "1800"), repo.WithHeader("user-agent", "my-app"))
+//
+// It's better to set these options last though, just in case a prior opt mucks about with headers or clients or roundtrippers
+func WithHeader(key, value string) func(*Repo) error {
+	return func(r *Repo) error {
+		r.client.Transport = customHeader{
+			key:   key,
+			value: value,
+			rt:    r.client.Transport,
+		}
+
+		return nil
+	}
+}

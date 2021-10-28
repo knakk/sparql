@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/base64"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -173,6 +174,51 @@ func (r *Repo) Query(queryProvider interface{}) (*Results, error) {
 	}
 
 	return results, nil
+}
+
+func (r *Repo) QueryWithoutParsing(queryProvider interface{}) (io.ReadCloser, error) {
+
+	var req *http.Request
+	var err error
+
+	if p, ok := queryProvider.(Provider); ok {
+		req, err = p.GenRequest(r.endpoint)
+	}
+
+	if s, ok := queryProvider.(string); ok {
+		var p GenericCall
+		p.Query = s
+		req, err = p.GenRequest(r.endpoint)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	if req == nil {
+		return nil, fmt.Errorf("Request failed: no http.Request provided. ")
+	}
+
+	resp, err := r.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		b, err := ioutil.ReadAll(resp.Body)
+		var msg string
+		if err != nil {
+			msg = "Failed to read response body"
+		} else {
+			if strings.TrimSpace(string(b)) != "" {
+				msg = "Response body: \n" + string(b)
+			}
+		}
+		return nil, fmt.Errorf("Query: SPARQL request failed: %s. "+msg, resp.Status)
+	}
+
+	return resp.Body, nil
 }
 
 // Construct performs a SPARQL HTTP request to the Repo, and returns the

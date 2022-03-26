@@ -176,6 +176,8 @@ func (r *Repo) Query(queryProvider interface{}) (*Results, error) {
 	return results, nil
 }
 
+// QueryWithoutParsing performs query and returns the unparsed reponse as an io.ReadCloser.
+// Except on errors, it's the callers responsibility to close the response.
 func (r *Repo) QueryWithoutParsing(queryProvider interface{}) (io.ReadCloser, error) {
 
 	var req *http.Request
@@ -203,9 +205,9 @@ func (r *Repo) QueryWithoutParsing(queryProvider interface{}) (io.ReadCloser, er
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
+		defer resp.Body.Close()
 		b, err := ioutil.ReadAll(resp.Body)
 		var msg string
 		if err != nil {

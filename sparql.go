@@ -25,6 +25,7 @@ func init() {
 // Results holds the parsed results of a application/sparql-results+json response.
 type Results struct {
 	Head    header
+	Boolean bool
 	Results results
 }
 

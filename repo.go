@@ -131,13 +131,12 @@ func (r *Repo) Query(queryProvider interface{}) (*Results, error) {
 	var req *http.Request
 	var err error
 
-	if p, ok := queryProvider.(Provider); ok {
-		req, err = p.GenRequest(r.endpoint)
-	}
-
-	if s, ok := queryProvider.(string); ok {
+	switch qs := queryProvider.(type) {
+	case Provider:
+		req, err = qs.GenRequest(r.endpoint)
+	case string:
 		var p GenericCall
-		p.Query = s
+		p.Query = qs
 		req, err = p.GenRequest(r.endpoint)
 	}
 
@@ -182,13 +181,12 @@ func (r *Repo) QueryWithoutParsing(queryProvider interface{}) (io.ReadCloser, er
 	var req *http.Request
 	var err error
 
-	if p, ok := queryProvider.(Provider); ok {
-		req, err = p.GenRequest(r.endpoint)
-	}
-
-	if s, ok := queryProvider.(string); ok {
+	switch qs := queryProvider.(type) {
+	case Provider:
+		req, err = qs.GenRequest(r.endpoint)
+	case string:
 		var p GenericCall
-		p.Query = s
+		p.Query = qs
 		req, err = p.GenRequest(r.endpoint)
 	}
 

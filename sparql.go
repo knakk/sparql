@@ -105,6 +105,10 @@ func termFromJSON(b binding) (rdf.Term, error) {
 		if b.Lang != "" {
 			return rdf.NewLangLiteral(b.Value, b.Lang)
 		}
+		if b.DataType != "" {
+			dt, _ := rdf.NewIRI(b.DataType)
+			return rdf.NewTypedLiteral(b.Value, dt), nil
+		}
 		return rdf.NewTypedLiteral(b.Value, xsdString), nil
 	case "typed-literal":
 		iri, err := rdf.NewIRI(b.DataType)

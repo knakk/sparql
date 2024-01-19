@@ -1,4 +1,4 @@
-module github.com/cem-okulmus/sparql
+module github.com/knack/sparql
 
 go 1.18
 

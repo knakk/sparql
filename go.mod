@@ -1,4 +1,4 @@
-module github.com/knack/sparql
+module github.com/knakk/sparql
 
 go 1.18
 
